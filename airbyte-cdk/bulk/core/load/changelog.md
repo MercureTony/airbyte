@@ -7,9 +7,13 @@ The Load CDK provides functionality for destination connectors including stream-
 <details>
   <summary>Expand to review</summary>
 
-### 1.0.20 — 2026-07-28
+### 1.0.21 — 2026-07-28
 
 [#83201](https://github.com/airbytehq/airbyte/pull/83201) — Bump Testcontainers to 1.21.4 for Docker API v1.44 negotiation.
+
+### 1.0.20 — 2026-07-28
+
+[#83220](https://github.com/airbytehq/airbyte/pull/83220) — Fix: use date-based namespace format in component test `generateTestNamespace()` so stale test schemas are automatically cleaned up by `DestinationCleaner`.
 
 ### 1.0.19 — 2026-07-21
 
