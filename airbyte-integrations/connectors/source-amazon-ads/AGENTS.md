@@ -16,6 +16,24 @@ When a user syncs the same report type with different time granularities simulta
 
 **Why this matters:** HTTP 425 is extremely rare in REST APIs and is not handled by default error handlers. If you see a config error mentioning "duplicate report requests," it is not a credential or permission issue — it is a concurrency conflict that requires changing the source configuration or splitting into separate connections.
 
+## 3. Report Columns Are Opt-In, and Missing Ones Fail Silently
+
+Amazon's v3 reporting API returns only the columns named in `configuration.columns`. Omitting a column is not an error — the report simply comes back without it, so a stream can look healthy while silently withholding most of what the report type offers. This is how `sponsored_brands_campaigns_report_stream` shipped requesting 18 of the 65 documented `sbCampaigns` columns, which produced [oncall#13131](https://github.com/airbytehq/oncall/issues/13131).
+
+The authoritative column list per report type is at `https://d3a0d0y2hgofx6.cloudfront.net/en-us/guides/reporting/v3/report-types/<page>.md` (the rendered docs site is a JS shell that does not crawl; the CloudFront `.md` files are the same content as raw markdown). Column types live in `guides/reporting/v3/columns.md`. The available set for a stream is the report type's base metrics plus the "Additional metrics" of every value in its `groupBy`.
+
+**Why this matters:** when you add or touch a report stream, request the report type's full documented column set and declare every one of them in the inline schema. `test_every_requested_report_column_is_declared_in_the_schema` enforces the second half. Amazon returns 400 for a column that is invalid for the chosen `groupBy`, so validate new column lists against the live API (regression tests or a pre-release pin) before merging.
+
+## 4. `timeUnit` Determines Which Date Columns Are Legal
+
+`DAILY` reports carry the `date` column; `SUMMARY` reports carry `startDate`/`endDate`. The pairing is not interchangeable — requesting `date` on a `SUMMARY` report fails. `test_report_date_columns_match_time_unit` guards this. Note that `reportDate` is not an Amazon column at all: `transformation_report_add_fields` synthesises it from `stream_interval.end_time` on every report stream, daily ones included.
+
+## 5. Sponsored Brands Creative Type Lives on the Ad Entity, Not on Reports
+
+No v3 Sponsored Brands *report* exposes creative type or ad format — `adFormat` belongs to the `benchmarks` report and `creativeType` to Amazon DSP. Sponsored Brands V4 moved creative type onto the ad entity, so the only way to tell a video ad from a collection ad is `sponsored_brands_ads` (`POST sb/v4/ads/list`) → `creative.type`, joined to report rows on `adId`. The V2 streams that used a `creativeType=video` report filter were removed in 6.0.0 and have no direct equivalent.
+
+**Why this matters:** requests to "split Sponsored Brands reporting by video" cannot be answered by adding a report column. They need the ad entity stream plus a join. The video *metrics* themselves (`video5SecondViews`, `videoCompleteViews`, and so on) are ordinary report columns and differ per report type — `viewClickThroughRate` is `sbCampaigns`-only and `viewableImpressions` is not available on `sbAdGroup`.
+
 ## Incremental Stream Considerations
 
 The Amazon Ads API uses report-based data access for most metrics. The `profiles` endpoint lists advertising profiles and does not support date-based filtering — it returns the current list of profiles. The connector already uses `DatetimeBasedCursor` for report streams (sponsored products, brands, display). The two FR parent streams (`profiles`, `profiles_filtered`) are small config-style lookups.

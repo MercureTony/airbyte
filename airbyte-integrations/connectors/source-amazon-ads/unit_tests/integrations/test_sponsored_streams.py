@@ -279,6 +279,65 @@ class TestSponsoredBrandsStreamsFullRefresh(TestCase):
         assert len(output.records) == 2
 
     @HttpMocker()
+    def test_given_one_page_when_read_ads_then_return_records(self, http_mocker: HttpMocker):
+        """
+        Check ads stream: normal full refresh sync without pagination
+        """
+        self._given_oauth_and_profiles(http_mocker, self._config)
+
+        stream_name = "sponsored_brands_ads"
+        data_field = "ads"
+        record_id_path = "adId"
+
+        http_mocker.post(
+            SponsoredBrandsRequestBuilder.ads_endpoint(self._config["client_id"], self._config["access_token"], self._config["profiles"][0])
+            .with_request_body(_DEFAULT_REQUEST_BODY)
+            .build(),
+            _a_response(stream_name, data_field, None).with_record(_a_record(stream_name, data_field, record_id_path)).build(),
+        )
+
+        output = read_stream(stream_name, SyncMode.full_refresh, self._config)
+        assert len(output.records) == 1
+        # `creative.type` is the only field that identifies a Sponsored Brands Video ad; V3 reports
+        # dropped the campaign-level creativeType/adFormat columns.
+        assert output.records[0].record.data["creative"]["type"] == "VIDEO"
+
+    @HttpMocker()
+    def test_given_many_pages_when_read_ads_then_return_records(self, http_mocker: HttpMocker):
+        """
+        Check ads stream: normal full refresh sync with pagination
+        """
+        stream_name = "sponsored_brands_ads"
+        data_field = "ads"
+        record_id_path = "adId"
+        pagination_strategy = SponsoredCursorBasedPaginationStrategy()
+
+        paginated_request_body = json.dumps({"nextToken": "next-page-token", "maxResults": 100})
+
+        self._given_oauth_and_profiles(http_mocker, self._config)
+
+        http_mocker.post(
+            SponsoredBrandsRequestBuilder.ads_endpoint(self._config["client_id"], self._config["access_token"], self._config["profiles"][0])
+            .with_request_body(_DEFAULT_REQUEST_BODY)
+            .build(),
+            _a_response(stream_name, data_field, pagination_strategy)
+            .with_record(_a_record(stream_name, data_field, record_id_path))
+            .with_pagination()
+            .build(),
+        )
+        http_mocker.post(
+            SponsoredBrandsRequestBuilder.ads_endpoint(self._config["client_id"], self._config["access_token"], self._config["profiles"][0])
+            .with_request_body(paginated_request_body)
+            .build(),
+            _a_response(stream_name, data_field, pagination_strategy)
+            .with_record(_a_record(stream_name, data_field, record_id_path))
+            .build(),
+        )
+
+        output = read_stream(stream_name, SyncMode.full_refresh, self._config)
+        assert len(output.records) == 2
+
+    @HttpMocker()
     def test_given_non_breaking_error_when_read_keywords_then_stream_is_ignored(self, http_mocker: HttpMocker):
         """
         Check keywords stream: non-breaking errors are ignored

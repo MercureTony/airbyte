@@ -159,11 +159,23 @@ For more information on resetting your data in Airbyte, see [this page](/platfor
 
 The `SponsoredDisplayReportStream` stream now has an updated schema, thanks to a recent change in the Amazon Ads API. You can find more details in the [Amazon Migration Guide (metrics)](https://advertising.amazon.com/API/docs/en-us/reference/migration-guides/reporting-v2-v3#metrics).
 
-Please note that SponsoredBrandsReportStream and SponsoredBrandsVideoReportStream will become unavailable as a result of the deprecation of API V2. We recommend switching to SponsoredBrandsV3ReportStream as a great alternative.
-see [Amazon Migration Guide (metrics)](https://advertising.amazon.com/API/docs/en-us/reference/migration-guides/reporting-v2-v3#metrics) for more info.
+Please note that `SponsoredBrandsReportStream` and `SponsoredBrandsVideoReportStream` will become unavailable as a result of the deprecation of API V2. See the [Amazon Migration Guide (metrics)](https://advertising.amazon.com/API/docs/en-us/reference/migration-guides/reporting-v2-v3#metrics) for the full V2-to-V3 metric mapping.
 
-Streams `SponsoredBrandsReportStream` `SponsoredBrandsVideoReportStream` will become unavailable.
-It is recommended to use `SponsoredBrandsV3ReportStream` as an alternative.
+:::warning
+Earlier versions of this guide recommended `SponsoredBrandsV3ReportStream` as the replacement for both streams. That advice was incorrect. `sponsored_brands_v3_report_stream` uses Amazon's `sbPurchasedProduct` report type, which contains purchased-product attribution data only — it has no `impressions`, `clicks`, `cost`, or video metrics.
+:::
+
+Use these streams instead, all added or completed in version 9.1.0:
+
+| V2 stream (removed) | V3 replacement | Report type |
+| :--- | :--- | :--- |
+| `SponsoredBrandsReportStream` (campaigns) | `sponsored_brands_campaigns_report_stream` | `sbCampaigns` |
+| `SponsoredBrandsReportStream` (adGroups) | `sponsored_brands_adgroups_report_stream` | `sbAdGroup` |
+| `SponsoredBrandsVideoReportStream` | `sponsored_brands_campaigns_report_stream`, `sponsored_brands_adgroups_report_stream`, or `sponsored_brands_ads_report_stream` | `sbCampaigns`, `sbAdGroup`, `sbAds` |
+
+All three replacement streams carry `video5SecondViews`, `video5SecondViewRate`, `videoCompleteViews`, `videoFirstQuartileViews`, `videoMidpointViews`, `videoThirdQuartileViews`, `videoUnmutes`, and `viewabilityRate` (V2 `vtr`). `viewableImpressions` is available on `sbCampaigns` and `sbAds` only, and `viewClickThroughRate` (V2 `vctr`) on `sbCampaigns` only. See [Sponsored Brands report types](/integrations/sources/amazon-ads#identifying-sponsored-brands-video-campaigns) for the full breakdown.
+
+The V2 video stream filtered to video creatives with `creativeType=video`. V3 reports have no creative-type column, because Amazon moved creative type onto the ad entity in Sponsored Brands V4. To split reporting by creative type, sync the `sponsored_brands_ads` stream and join its `adId` to `sponsored_brands_ads_report_stream.adId`, then filter on `creative.type` (`VIDEO` or `BRAND_VIDEO` for video ads). Video metrics are video-only, so they are also null or zero for non-video creatives.
 
 ### Refresh affected schemas and reset data
 
