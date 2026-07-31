@@ -200,7 +200,7 @@ If you use Airbyte Cloud and your organization restricts access to specific IPs,
 
 | Version    | Date       | Pull Request                                             | Subject                                                                                                                                                                |
 |:-----------|:-----------|:---------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 9.1.0 | 2026-07-31 | [82900](https://github.com/airbytehq/airbyte/pull/82900) | Request every documented column on all v3 report streams; add `sponsored_brands_ads`, `sponsored_brands_ads_report_stream`, and `sponsored_brands_ads_report_stream_daily` |
+| 9.1.0 | 2026-07-31 | [83305](https://github.com/airbytehq/airbyte/pull/83305) | Request every documented column on all v3 report streams; add `sponsored_brands_ads`, `sponsored_brands_ads_report_stream`, and `sponsored_brands_ads_report_stream_daily` |
 | 9.0.6 | 2026-07-28 | [82817](https://github.com/airbytehq/airbyte/pull/82817) | Update dependencies |
 | 9.0.5 | 2026-07-21 | [82341](https://github.com/airbytehq/airbyte/pull/82341) | Update dependencies |
 | 9.0.4 | 2026-07-14 | [81732](https://github.com/airbytehq/airbyte/pull/81732) | Update dependencies |
