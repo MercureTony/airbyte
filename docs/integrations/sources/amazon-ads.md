@@ -155,6 +155,10 @@ Each stream above is available in both summary and daily variants.
 
 Sponsored Brands V3 reports do not carry a creative-type or ad-format column. Creative type moved to the ad entity when Amazon released Sponsored Brands V4, so use the `sponsored_brands_ads` stream: its `creative.type` field is one of `AUTO_COLLECTION`, `BRAND_VIDEO`, `MANUAL_COLLECTION`, `PRODUCT_COLLECTION`, `STORE_SPOTLIGHT`, or `VIDEO`. Join `sponsored_brands_ads.adId` to `sponsored_brands_ads_report_stream.adId` to split reporting by creative type.
 
+:::note
+Amazon types `adId` as a string on the ads entity API but as an integer in reporting v3, so the two streams land with different column types in your destination. Cast one side when joining — for example `... ON CAST(ads.adId AS STRING) = CAST(rpt.adId AS STRING)`. The same applies to `adGroupId` and `campaignId`.
+:::
+
 The `sbCampaigns`, `sbAdGroup`, and `sbAds` reports carry the video metrics that the removed V2 `sponsored_brands_video_report_stream` returned. These are video-only metrics, so they are populated only for video creatives. Amazon does not offer every metric on every report type:
 
 | Metric | `sbCampaigns` | `sbAdGroup` | `sbAds` |
@@ -163,6 +167,10 @@ The `sbCampaigns`, `sbAdGroup`, and `sbAds` reports carry the video metrics that
 | `viewabilityRate` (V2 `vtr`) | ✅ | ✅ | ✅ |
 | `viewableImpressions` | ✅ | — | ✅ |
 | `viewClickThroughRate` (V2 `vctr`) | ✅ | — | — |
+
+:::warning
+Amazon ships the `sbCampaigns`, `sbAdGroup`, and `sbAds` report types in preview. While they are in preview, Amazon excludes all data for Sponsored Brands campaigns whose `isMultiAdGroupsEnabled` flag is `false`, as noted on the [campaign](https://advertising.amazon.com/API/docs/en-us/guides/reporting/v3/report-types/campaign), [ad group](https://advertising.amazon.com/API/docs/en-us/guides/reporting/v3/report-types/ad-group), and [ad](https://advertising.amazon.com/API/docs/en-us/guides/reporting/v3/report-types/ad) report-type pages. Those campaigns return no rows and the sync still succeeds, so the gap is silent. Sync the `sponsored_brands_campaigns` stream and check its `isMultiAdGroupsEnabled` field to see which of your campaigns are excluded; enabling multiple ad groups on a campaign in the Amazon Ads console brings it into V3 reporting. `sponsored_brands_v3_report_stream` (`sbPurchasedProduct`) is not in preview and is unaffected.
+:::
 
 ## Performance considerations
 
@@ -200,7 +208,7 @@ If you use Airbyte Cloud and your organization restricts access to specific IPs,
 
 | Version    | Date       | Pull Request                                             | Subject                                                                                                                                                                |
 |:-----------|:-----------|:---------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 9.1.0 | 2026-07-31 | [83305](https://github.com/airbytehq/airbyte/pull/83305) | Request every documented column on all v3 report streams; add `sponsored_brands_ads`, `sponsored_brands_ads_report_stream`, and `sponsored_brands_ads_report_stream_daily` |
+| 9.1.0 | 2026-07-31 | [83305](https://github.com/airbytehq/airbyte/pull/83305) | Request every documented column on all v3 report streams; add `sponsored_brands_ads`, `sponsored_brands_ads_report_stream`, and `sponsored_brands_ads_report_stream_daily`; add `goal`, `isMultiAdGroupsEnabled`, `kpi`, `siteRestrictions`, and `targetedPGDealId` to the `sponsored_brands_campaigns` schema. All changes are additive — refresh the source schema in each connection to pick up the new fields. |
 | 9.0.6 | 2026-07-28 | [82817](https://github.com/airbytehq/airbyte/pull/82817) | Update dependencies |
 | 9.0.5 | 2026-07-21 | [82341](https://github.com/airbytehq/airbyte/pull/82341) | Update dependencies |
 | 9.0.4 | 2026-07-14 | [81732](https://github.com/airbytehq/airbyte/pull/81732) | Update dependencies |

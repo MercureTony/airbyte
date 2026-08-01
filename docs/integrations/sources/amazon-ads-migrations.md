@@ -173,9 +173,13 @@ Use these streams instead, all added or completed in version 9.1.0:
 | `SponsoredBrandsReportStream` (adGroups) | `sponsored_brands_adgroups_report_stream` | `sbAdGroup` |
 | `SponsoredBrandsVideoReportStream` | `sponsored_brands_campaigns_report_stream`, `sponsored_brands_adgroups_report_stream`, or `sponsored_brands_ads_report_stream` | `sbCampaigns`, `sbAdGroup`, `sbAds` |
 
-All three replacement streams carry `video5SecondViews`, `video5SecondViewRate`, `videoCompleteViews`, `videoFirstQuartileViews`, `videoMidpointViews`, `videoThirdQuartileViews`, `videoUnmutes`, and `viewabilityRate` (V2 `vtr`). `viewableImpressions` is available on `sbCampaigns` and `sbAds` only, and `viewClickThroughRate` (V2 `vctr`) on `sbCampaigns` only. See [Sponsored Brands report types](/integrations/sources/amazon-ads#identifying-sponsored-brands-video-campaigns) for the full breakdown.
+:::note
+Both V2 streams also returned a keyword-level record type. This connector has no Sponsored Brands keyword report stream, so that grain has no replacement today. If you relied on it, [open an issue](https://github.com/airbytehq/airbyte/issues/new/choose) so we can prioritize a Sponsored Brands targeting report stream.
+:::
 
-The V2 video stream filtered to video creatives with `creativeType=video`. V3 reports have no creative-type column, because Amazon moved creative type onto the ad entity in Sponsored Brands V4. To split reporting by creative type, sync the `sponsored_brands_ads` stream and join its `adId` to `sponsored_brands_ads_report_stream.adId`, then filter on `creative.type` (`VIDEO` or `BRAND_VIDEO` for video ads). Video metrics are video-only, so they are also null or zero for non-video creatives.
+All three replacement streams carry `video5SecondViews`, `video5SecondViewRate`, `videoCompleteViews`, `videoFirstQuartileViews`, `videoMidpointViews`, `videoThirdQuartileViews`, `videoUnmutes`, and `viewabilityRate` (V2 `vtr`). `viewableImpressions` is available on `sbCampaigns` and `sbAds` only, and `viewClickThroughRate` (V2 `vctr`) on `sbCampaigns` only. See [Sponsored Brands report types](/integrations/sources/amazon-ads#identifying-sponsored-brands-video-campaigns) for the full breakdown and for an important limitation: Amazon ships all three report types in preview and returns no rows for campaigns with `isMultiAdGroupsEnabled` set to `false`, which typically includes the older single-ad-group campaigns the V2 video report covered.
+
+The V2 video stream filtered to video creatives with `creativeType=video`. V3 reports have no creative-type column, because Amazon moved creative type onto the ad entity in Sponsored Brands V4. To split reporting by creative type, sync the `sponsored_brands_ads` stream and join its `adId` to `sponsored_brands_ads_report_stream.adId` — casting one side, because Amazon types `adId` as a string on the entity API and as an integer in reporting — then filter on `creative.type` (`VIDEO` or `BRAND_VIDEO` for video ads). Video metrics are video-only, so they are also null or zero for non-video creatives.
 
 ### Refresh affected schemas and reset data
 

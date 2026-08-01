@@ -18,7 +18,7 @@ When a user syncs the same report type with different time granularities simulta
 
 Amazon's v3 reporting API returns only the columns listed in a report stream's `configuration.columns`. Leaving one out is not an error, so an under-specified stream syncs cleanly while withholding data. Streams here request the full documented column set for their report type; keep it that way when adding or editing one, and declare every requested column in the inline schema so users can see the record shape before syncing.
 
-Two rules to know: `DAILY` reports use the `date` column while `SUMMARY` reports use `startDate`/`endDate`, and Amazon returns 400 for a column that is not valid for the stream's `groupBy`. Validate new column lists against the live API before merging.
+Two rules to know: `DAILY` reports use the `date` column while `SUMMARY` reports use `startDate`/`endDate`, and Amazon rejects a column that is not valid for the stream's `groupBy` with a 400 or 422. Validate new column lists against the live API before merging.
 
 ## 4. Sponsored Brands Creative Type Is Not a Report Column
 

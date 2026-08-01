@@ -591,6 +591,8 @@ definitions:
       type: DeclarativeStream
       name: sponsored_brands_ads
       primary_key:
+        - campaignId
+        - adGroupId
         - adId
       retriever:
         type: SimpleRetriever
@@ -5900,11 +5902,11 @@ schemas:
       royaltyQualifiedBorrows:
         type:
           - "null"
-          - integer
+          - number
       royaltyQualifiedBorrowsFromClicks:
         type:
           - "null"
-          - integer
+          - number
       salesClicks:
         type:
           - "null"
@@ -6171,11 +6173,11 @@ schemas:
       royaltyQualifiedBorrows:
         type:
           - "null"
-          - integer
+          - number
       royaltyQualifiedBorrowsFromClicks:
         type:
           - "null"
-          - integer
+          - number
       salesClicks:
         type:
           - "null"
@@ -6438,11 +6440,11 @@ schemas:
       royaltyQualifiedBorrows:
         type:
           - "null"
-          - integer
+          - number
       royaltyQualifiedBorrowsFromClicks:
         type:
           - "null"
-          - integer
+          - number
       salesClicks:
         type:
           - "null"
@@ -6697,11 +6699,11 @@ schemas:
       royaltyQualifiedBorrows:
         type:
           - "null"
-          - integer
+          - number
       royaltyQualifiedBorrowsFromClicks:
         type:
           - "null"
-          - integer
+          - number
       salesClicks:
         type:
           - "null"
@@ -7243,11 +7245,11 @@ schemas:
       royaltyQualifiedBorrows:
         type:
           - "null"
-          - integer
+          - number
       royaltyQualifiedBorrowsFromClicks:
         type:
           - "null"
-          - integer
+          - number
       sales:
         type:
           - "null"
@@ -7506,11 +7508,11 @@ schemas:
       royaltyQualifiedBorrows:
         type:
           - "null"
-          - integer
+          - number
       royaltyQualifiedBorrowsFromClicks:
         type:
           - "null"
-          - integer
+          - number
       sales:
         type:
           - "null"
@@ -11177,7 +11179,7 @@ schemas:
       royaltyQualifiedBorrows:
         type:
           - "null"
-          - integer
+          - number
       spend:
         type:
           - "null"
@@ -11396,7 +11398,7 @@ schemas:
       royaltyQualifiedBorrows:
         type:
           - "null"
-          - integer
+          - number
       spend:
         type:
           - "null"
@@ -11587,11 +11589,11 @@ schemas:
       royaltyQualifiedBorrows:
         type:
           - "null"
-          - integer
+          - number
       royaltyQualifiedBorrowsFromClicks:
         type:
           - "null"
-          - integer
+          - number
       sales14d:
         type:
           - "null"
@@ -11794,11 +11796,11 @@ schemas:
       royaltyQualifiedBorrows:
         type:
           - "null"
-          - integer
+          - number
       royaltyQualifiedBorrowsFromClicks:
         type:
           - "null"
-          - integer
+          - number
       sales14d:
         type:
           - "null"
@@ -12001,11 +12003,11 @@ schemas:
       royaltyQualifiedBorrows:
         type:
           - "null"
-          - integer
+          - number
       royaltyQualifiedBorrowsFromClicks:
         type:
           - "null"
-          - integer
+          - number
       sales14d:
         type:
           - "null"
@@ -12212,11 +12214,11 @@ schemas:
       royaltyQualifiedBorrows:
         type:
           - "null"
-          - integer
+          - number
       royaltyQualifiedBorrowsFromClicks:
         type:
           - "null"
-          - integer
+          - number
       sales14d:
         type:
           - "null"
@@ -12427,7 +12429,7 @@ schemas:
       royaltyQualifiedBorrows:
         type:
           - "null"
-          - integer
+          - number
       spend:
         type:
           - "null"
@@ -12634,7 +12636,7 @@ schemas:
       royaltyQualifiedBorrows:
         type:
           - "null"
-          - integer
+          - number
       spend:
         type:
           - "null"
@@ -12873,7 +12875,7 @@ schemas:
       royaltyQualifiedBorrows:
         type:
           - "null"
-          - integer
+          - number
       salesOtherSku7d:
         type:
           - "null"
@@ -13124,7 +13126,7 @@ schemas:
       royaltyQualifiedBorrows:
         type:
           - "null"
-          - integer
+          - number
       salesOtherSku7d:
         type:
           - "null"
@@ -13359,7 +13361,7 @@ schemas:
       royaltyQualifiedBorrows:
         type:
           - "null"
-          - integer
+          - number
       salesOtherSku7d:
         type:
           - "null"
@@ -13594,7 +13596,7 @@ schemas:
       royaltyQualifiedBorrows:
         type:
           - "null"
-          - integer
+          - number
       salesOtherSku7d:
         type:
           - "null"
@@ -13841,7 +13843,7 @@ schemas:
       royaltyQualifiedBorrows:
         type:
           - "null"
-          - integer
+          - number
       salesOtherSku7d:
         type:
           - "null"
@@ -14092,7 +14094,7 @@ schemas:
       royaltyQualifiedBorrows:
         type:
           - "null"
-          - integer
+          - number
       salesOtherSku7d:
         type:
           - "null"

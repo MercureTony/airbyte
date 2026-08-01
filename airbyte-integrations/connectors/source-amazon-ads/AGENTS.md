@@ -22,7 +22,7 @@ Amazon's v3 reporting API returns only the columns named in `configuration.colum
 
 The authoritative column list per report type is at `https://d3a0d0y2hgofx6.cloudfront.net/en-us/guides/reporting/v3/report-types/<page>.md` (the rendered docs site is a JS shell that does not crawl; the CloudFront `.md` files are the same content as raw markdown). Column types live in `guides/reporting/v3/columns.md`. The available set for a stream is the report type's base metrics plus the "Additional metrics" of every value in its `groupBy`.
 
-**Why this matters:** when you add or touch a report stream, request the report type's full documented column set and declare every one of them in the inline schema. `test_every_requested_report_column_is_declared_in_the_schema` enforces the second half. Amazon returns 400 for a column that is invalid for the chosen `groupBy`, so validate new column lists against the live API (regression tests or a pre-release pin) before merging.
+**Why this matters:** when you add or touch a report stream, request the report type's full documented column set and declare every one of them in the inline schema. `test_every_requested_report_column_is_declared_in_the_schema` enforces the second half. Amazon does not document which status code an invalid column produces; `POST /reporting/reports` declares both 400 and 422 ("Unprocessable entity - Failed due to invalid parameters"), so assume either and validate new column lists against the live API (regression tests or a pre-release pin) before merging.
 
 ## 4. `timeUnit` Determines Which Date Columns Are Legal
 
@@ -42,6 +42,8 @@ The Amazon Ads API uses report-based data access for most metrics. The `profiles
 |---|---|---|---|---|---|---|
 | profiles | small | top-level parent | none | none | deferred_no_api_support | Config-style; lists advertising profiles, no date filter |
 | profiles_filtered | small | top-level parent | none | none | deferred_no_api_support | Filtered variant of profiles endpoint |
+| sponsored_brands_ads_report_stream | medium | top-level parent | reportDate | reportDate | incremental | `DatetimeBasedCursor` via `incremental_sync_report_datetime_cursor` |
+| sponsored_brands_ads_report_stream_daily | medium | top-level parent | date | date | incremental | `DatetimeBasedCursor` via `incremental_sync_report_datetime_cursor_daily` |
 | sponsored_brands_v3_report_stream | medium | top-level parent | reportDate | reportDate | incremental | `DatetimeBasedCursor` via `incremental_sync_report_datetime_cursor` |
 | sponsored_brands_v3_report_stream_daily | medium | top-level parent | date | date | incremental | `DatetimeBasedCursor` via `incremental_sync_report_datetime_cursor_daily` |
 | sponsored_display_adgroups_report_stream | medium | top-level parent | reportDate | reportDate | incremental | `DatetimeBasedCursor` via `incremental_sync_report_datetime_cursor` |
@@ -74,6 +76,7 @@ The Amazon Ads API uses report-based data access for most metrics. The `profiles
 | attribution_report_products | medium | child of profiles_filtered | none | none | deferred_child |  |
 | portfolios | medium | child of profiles_filtered | none | none | deferred_child |  |
 | sponsored_brands_ad_groups | medium | child of profiles_filtered | none | none | deferred_child |  |
+| sponsored_brands_ads | medium | child of profiles_filtered | none | none | deferred_child |  |
 | sponsored_brands_campaigns | medium | child of profiles_filtered | none | none | deferred_child |  |
 | sponsored_brands_keywords | medium | child of profiles_filtered | none | none | deferred_child |  |
 | sponsored_display_ad_groups | medium | child of profiles_filtered | none | none | deferred_child |  |
@@ -95,4 +98,4 @@ The Amazon Ads API uses report-based data access for most metrics. The `profiles
 ### Future incremental stream candidates
 
 - **No API date filter (2 streams):** `profiles`, `profiles_filtered` — these endpoints do not expose date-based filtering. A future agent should verify via live API probing whether undocumented filter parameters are accepted.
-- **Child streams (23 streams):** `attribution_report_performance_adgroup`, `attribution_report_performance_campaign`, `attribution_report_performance_creative`, `attribution_report_products`, `portfolios`, `sponsored_brands_ad_groups`, `sponsored_brands_campaigns`, `sponsored_brands_keywords`, `sponsored_display_ad_groups`, `sponsored_display_budget_rules`, `sponsored_display_campaigns`, `sponsored_display_creatives`, `sponsored_display_product_ads`, `sponsored_display_targetings`, `sponsored_product_ad_group_bid_recommendations`, `sponsored_product_ad_group_suggested_keywords`, `sponsored_product_ad_groups`, `sponsored_product_ads`, `sponsored_product_campaign_negative_keywords`, `sponsored_product_campaigns`, `sponsored_product_keywords`, `sponsored_product_negative_keywords`, `sponsored_product_targetings` — partitioned via `SubstreamPartitionRouter`. A follow-up session should evaluate incremental support.
+- **Child streams (24 streams):** `attribution_report_performance_adgroup`, `attribution_report_performance_campaign`, `attribution_report_performance_creative`, `attribution_report_products`, `portfolios`, `sponsored_brands_ad_groups`, `sponsored_brands_ads`, `sponsored_brands_campaigns`, `sponsored_brands_keywords`, `sponsored_display_ad_groups`, `sponsored_display_budget_rules`, `sponsored_display_campaigns`, `sponsored_display_creatives`, `sponsored_display_product_ads`, `sponsored_display_targetings`, `sponsored_product_ad_group_bid_recommendations`, `sponsored_product_ad_group_suggested_keywords`, `sponsored_product_ad_groups`, `sponsored_product_ads`, `sponsored_product_campaign_negative_keywords`, `sponsored_product_campaigns`, `sponsored_product_keywords`, `sponsored_product_negative_keywords`, `sponsored_product_targetings` — partitioned via `SubstreamPartitionRouter`. A follow-up session should evaluate incremental support.
