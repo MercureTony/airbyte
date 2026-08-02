@@ -3243,7 +3243,6 @@ definitions:
                   "royaltyQualifiedBorrows",
                   "spend",
                   "startDate",
-                  "topOfSearchImpressionShare",
                 ]
               reportTypeId: spCampaigns
               filters: []
@@ -3323,7 +3322,6 @@ definitions:
                 - "qualifiedBorrows"
                 - "royaltyQualifiedBorrows"
                 - "spend"
-                - "topOfSearchImpressionShare"
               reportTypeId: spCampaigns
               filters: []
               timeUnit: DAILY
@@ -3923,12 +3921,10 @@ definitions:
                   "salesOtherSku14d",
                   "salesOtherSku30d",
                   "addToList",
-                  "addToListFromClicks",
                   "endDate",
                   "keywordType",
                   "kindleEditionNormalizedPagesRead14d",
                   "kindleEditionNormalizedPagesRoyalties14d",
-                  "marketplace",
                   "portfolioId",
                   "purchases14d",
                   "purchases1d",
@@ -3939,9 +3935,7 @@ definitions:
                   "purchasesOtherSku30d",
                   "purchasesOtherSku7d",
                   "qualifiedBorrows",
-                  "qualifiedBorrowsFromClicks",
                   "royaltyQualifiedBorrows",
-                  "royaltyQualifiedBorrowsFromClicks",
                   "sales14d",
                   "sales1d",
                   "sales30d",
@@ -4002,11 +3996,9 @@ definitions:
                 - "salesOtherSku14d"
                 - "salesOtherSku30d"
                 - "addToList"
-                - "addToListFromClicks"
                 - "keywordType"
                 - "kindleEditionNormalizedPagesRead14d"
                 - "kindleEditionNormalizedPagesRoyalties14d"
-                - "marketplace"
                 - "portfolioId"
                 - "purchases14d"
                 - "purchases1d"
@@ -4017,9 +4009,7 @@ definitions:
                 - "purchasesOtherSku30d"
                 - "purchasesOtherSku7d"
                 - "qualifiedBorrows"
-                - "qualifiedBorrowsFromClicks"
                 - "royaltyQualifiedBorrows"
-                - "royaltyQualifiedBorrowsFromClicks"
                 - "sales14d"
                 - "sales1d"
                 - "sales30d"
@@ -4079,12 +4069,10 @@ definitions:
                   "targeting",
                   "keywordType",
                   "addToList",
-                  "addToListFromClicks",
                   "endDate",
                   "keyword",
                   "kindleEditionNormalizedPagesRead14d",
                   "kindleEditionNormalizedPagesRoyalties14d",
-                  "marketplace",
                   "portfolioId",
                   "purchases14d",
                   "purchases1d",
@@ -4095,9 +4083,7 @@ definitions:
                   "purchasesOtherSku30d",
                   "purchasesOtherSku7d",
                   "qualifiedBorrows",
-                  "qualifiedBorrowsFromClicks",
                   "royaltyQualifiedBorrows",
-                  "royaltyQualifiedBorrowsFromClicks",
                   "sales14d",
                   "sales1d",
                   "sales30d",
@@ -4159,11 +4145,9 @@ definitions:
                 - "targeting"
                 - "keywordType"
                 - "addToList"
-                - "addToListFromClicks"
                 - "keyword"
                 - "kindleEditionNormalizedPagesRead14d"
                 - "kindleEditionNormalizedPagesRoyalties14d"
-                - "marketplace"
                 - "portfolioId"
                 - "purchases14d"
                 - "purchases1d"
@@ -4174,9 +4158,7 @@ definitions:
                 - "purchasesOtherSku30d"
                 - "purchasesOtherSku7d"
                 - "qualifiedBorrows"
-                - "qualifiedBorrowsFromClicks"
                 - "royaltyQualifiedBorrows"
-                - "royaltyQualifiedBorrowsFromClicks"
                 - "sales14d"
                 - "sales1d"
                 - "sales30d"
@@ -11188,10 +11170,6 @@ schemas:
         type:
           - "null"
           - string
-      topOfSearchImpressionShare:
-        type:
-          - "null"
-          - number
     title: sponsored_products_adgroups_report_stream
     type:
       - "null"
@@ -11403,10 +11381,6 @@ schemas:
         type:
           - "null"
           - number
-      topOfSearchImpressionShare:
-        type:
-          - "null"
-          - number
     title: sponsored_products_adgroups_report_stream_daily
     type:
       - "null"
@@ -11518,10 +11492,6 @@ schemas:
         type:
           - "null"
           - integer
-      addToListFromClicks:
-        type:
-          - "null"
-          - integer
       endDate:
         type:
           - "null"
@@ -11538,10 +11508,6 @@ schemas:
         type:
           - "null"
           - number
-      marketplace:
-        type:
-          - "null"
-          - string
       portfolioId:
         type:
           - "null"
@@ -11582,15 +11548,7 @@ schemas:
         type:
           - "null"
           - integer
-      qualifiedBorrowsFromClicks:
-        type:
-          - "null"
-          - integer
       royaltyQualifiedBorrows:
-        type:
-          - "null"
-          - number
-      royaltyQualifiedBorrowsFromClicks:
         type:
           - "null"
           - number
@@ -11729,10 +11687,6 @@ schemas:
         type:
           - "null"
           - integer
-      addToListFromClicks:
-        type:
-          - "null"
-          - integer
       keywordType:
         type:
           - "null"
@@ -11745,10 +11699,6 @@ schemas:
         type:
           - "null"
           - number
-      marketplace:
-        type:
-          - "null"
-          - string
       portfolioId:
         type:
           - "null"
@@ -11789,15 +11739,7 @@ schemas:
         type:
           - "null"
           - integer
-      qualifiedBorrowsFromClicks:
-        type:
-          - "null"
-          - integer
       royaltyQualifiedBorrows:
-        type:
-          - "null"
-          - number
-      royaltyQualifiedBorrowsFromClicks:
         type:
           - "null"
           - number
@@ -11932,10 +11874,6 @@ schemas:
         type:
           - "null"
           - integer
-      addToListFromClicks:
-        type:
-          - "null"
-          - integer
       endDate:
         type:
           - "null"
@@ -11952,10 +11890,6 @@ schemas:
         type:
           - "null"
           - number
-      marketplace:
-        type:
-          - "null"
-          - string
       portfolioId:
         type:
           - "null"
@@ -11996,15 +11930,7 @@ schemas:
         type:
           - "null"
           - integer
-      qualifiedBorrowsFromClicks:
-        type:
-          - "null"
-          - integer
       royaltyQualifiedBorrows:
-        type:
-          - "null"
-          - number
-      royaltyQualifiedBorrowsFromClicks:
         type:
           - "null"
           - number
@@ -12147,10 +12073,6 @@ schemas:
         type:
           - "null"
           - integer
-      addToListFromClicks:
-        type:
-          - "null"
-          - integer
       keyword:
         type:
           - "null"
@@ -12163,10 +12085,6 @@ schemas:
         type:
           - "null"
           - number
-      marketplace:
-        type:
-          - "null"
-          - string
       portfolioId:
         type:
           - "null"
@@ -12207,15 +12125,7 @@ schemas:
         type:
           - "null"
           - integer
-      qualifiedBorrowsFromClicks:
-        type:
-          - "null"
-          - integer
       royaltyQualifiedBorrows:
-        type:
-          - "null"
-          - number
-      royaltyQualifiedBorrowsFromClicks:
         type:
           - "null"
           - number
