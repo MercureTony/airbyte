@@ -24,7 +24,18 @@ The gap opens when a stream is scoped to a reporting *need* instead of to its re
 
 The authoritative column list per report type is at `https://d3a0d0y2hgofx6.cloudfront.net/en-us/guides/reporting/v3/report-types/<page>.md` (the rendered docs site is a JS shell that does not crawl; the CloudFront `.md` files are the same content as raw markdown). Column types live in `guides/reporting/v3/columns.md`. The available set for a stream is the report type's base metrics plus the "Additional metrics" of every value in its `groupBy`.
 
-**Why this matters:** when you add or touch a report stream, request the report type's full documented column set and declare every one of them in the inline schema. `test_every_requested_report_column_is_declared_in_the_schema` enforces the second half. Amazon does not document which status code an invalid column produces; `POST /reporting/reports` declares both 400 and 422 ("Unprocessable entity - Failed due to invalid parameters"), so assume either and validate new column lists against the live API (regression tests or a pre-release pin) before merging.
+### Documented does not mean accepted
+
+Amazon enforces per-`reportTypeId`/`groupBy` exclusions that appear nowhere in the column reference, and it rejects the **entire** report-creation request rather than dropping the offending column — so the stream returns no data at all. [#83305](https://github.com/airbytehq/airbyte/pull/83305) hit this on six streams that had passed unit tests and full CI; only a live run against a real account surfaced it. The exclusions found so far:
+
+| Report type | `groupBy` | Excluded columns | Streams |
+|---|---|---|---|
+| `spCampaigns` | `["campaign", "adGroup"]` | `topOfSearchImpressionShare` — Amazon's error names `campaign` + `adGroup` and/or `campaignPlacement` as the trigger | `sponsored_products_adgroups_report_stream{,_daily}` |
+| `spPurchasedProduct` | `["asin"]` | `addToListFromClicks`, `marketplace`, `qualifiedBorrowsFromClicks`, `royaltyQualifiedBorrowsFromClicks` | `sponsored_products_asins_{keywords,targets}_report_stream{,_daily}` |
+
+Do not re-add these without a live run proving Amazon accepts them. **A column being legal on another stream is not evidence it is legal here** — all three `*FromClicks` columns ship happily on the ten Sponsored Display report streams, and `topOfSearchImpressionShare` is accepted on `spCampaigns` grouped by `campaign` alone, on `spTargeting`, and on `sbCampaigns`. Two related notes: the non-`FromClicks` variants (`addToList`, `qualifiedBorrows`, `royaltyQualifiedBorrows`) *are* accepted on `spPurchasedProduct` and are requested; and `marketplaceId` appears in Amazon's `spPurchasedProduct` allowlist but no stream requests it and it has never been verified live, so treat adding it as a change needing its own live run.
+
+**Why this matters:** when you add or touch a report stream, request the report type's full documented column set *minus* the exclusions above, and declare every requested column in the inline schema. Amazon does not document which status code an invalid column produces; `POST /reporting/reports` declares both 400 and 422 ("Unprocessable entity - Failed due to invalid parameters"), so assume either and validate new column lists against the live API (regression tests or a pre-release pin) before merging. **The two guard tests cannot catch an illegal column.** `test_every_requested_report_column_is_declared_in_the_schema` is a subset check (`columns - properties`), so it only proves you declared what you requested — it knows nothing of Amazon's allowlists, and it also stays green if you remove a column but leave its schema property orphaned. `test_report_date_columns_match_time_unit` has the same blind spot. Both are structural; neither is a substitute for a live request.
 
 ## 4. `timeUnit` Determines Which Date Columns Are Legal
 

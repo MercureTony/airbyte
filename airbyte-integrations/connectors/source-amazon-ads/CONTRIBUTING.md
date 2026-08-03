@@ -16,11 +16,11 @@ When a user syncs the same report type with different time granularities simulta
 
 ## 3. Report Columns Are Opt-In
 
-Amazon's v3 reporting API returns only the columns listed in a report stream's `configuration.columns`. Leaving one out is not an error, so an under-specified stream syncs cleanly while withholding data. Streams here request the full documented column set for their report type; keep it that way when adding or editing one, and declare every requested column in the inline schema so users can see the record shape before syncing.
+Amazon's v3 reporting API returns only the columns listed in a report stream's `configuration.columns`. Leaving one out is not an error, so an under-specified stream syncs cleanly while withholding data. Streams here request the full documented column set for their report type, minus the handful Amazon rejects for that stream's `groupBy`; keep it that way when adding or editing one, and declare every requested column in the inline schema so users can see the record shape before syncing.
 
 Under-specified streams come from scoping a stream to a reporting need rather than to its report type. The Sponsored Brands campaign and ad group reports were added in [#78487](https://github.com/airbytehq/airbyte/pull/78487) for cost reporting and requested only that task's cost and conversion metrics, which is how every Sponsored Brands video metric went missing.
 
-Two rules to know: `DAILY` reports use the `date` column while `SUMMARY` reports use `startDate`/`endDate`, and Amazon rejects a column that is not valid for the stream's `groupBy` with a 400 or 422. Validate new column lists against the live API before merging.
+Three rules to know. `DAILY` reports use the `date` column while `SUMMARY` reports use `startDate`/`endDate`. Amazon rejects a column that is not valid for the stream's `groupBy` with a 400 or 422, and it fails the whole report rather than dropping the column, so the stream returns nothing at all. And those per-`groupBy` exclusions are absent from Amazon's column reference — [#83305](https://github.com/airbytehq/airbyte/pull/83305) tripped over six of them after unit tests and CI had gone green, so only a live run finds them. `AGENTS.md` lists the exclusions known so far: `topOfSearchImpressionShare` on `spCampaigns` grouped by campaign + ad group, and four columns on `spPurchasedProduct`. Validate new column lists against the live API before merging.
 
 ## 4. Sponsored Brands Creative Type Is Not a Report Column
 
