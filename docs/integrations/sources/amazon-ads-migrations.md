@@ -159,12 +159,11 @@ For more information on resetting your data in Airbyte, see [this page](/platfor
 
 The `SponsoredDisplayReportStream` stream now has an updated schema, thanks to a recent change in the Amazon Ads API. You can find more details in the [Amazon Migration Guide (metrics)](https://advertising.amazon.com/API/docs/en-us/reference/migration-guides/reporting-v2-v3#metrics).
 
-Please note that `SponsoredBrandsReportStream` and `SponsoredBrandsVideoReportStream` will become unavailable as a result of the deprecation of API V2.
-See the [Amazon Migration Guide (metrics)](https://advertising.amazon.com/API/docs/en-us/reference/migration-guides/reporting-v2-v3#metrics) for the full V2-to-V3 metric mapping.
+Please note that SponsoredBrandsReportStream and SponsoredBrandsVideoReportStream will become unavailable as a result of the deprecation of API V2. We recommend switching to SponsoredBrandsV3ReportStream as a great alternative.
+see [Amazon Migration Guide (metrics)](https://advertising.amazon.com/API/docs/en-us/reference/migration-guides/reporting-v2-v3#metrics) for more info.
 
-:::warning
-This section originally recommended `SponsoredBrandsV3ReportStream` as the replacement for both streams. That advice was incorrect: `sponsored_brands_v3_report_stream` uses Amazon's `sbPurchasedProduct` report type and carries no `impressions`, `clicks`, `cost`, or video metrics. Use `sponsored_brands_campaigns_report_stream` (`sbCampaigns`), `sponsored_brands_adgroups_report_stream` (`sbAdGroup`), or `sponsored_brands_ads_report_stream` (`sbAds`) instead — see [Sponsored Brands report types](/integrations/sources/amazon-ads#sponsored-brands-report-types).
-:::
+Streams `SponsoredBrandsReportStream` `SponsoredBrandsVideoReportStream` will become unavailable.
+It is recommended to use `SponsoredBrandsV3ReportStream` as an alternative.
 
 ### Refresh affected schemas and reset data
 
