@@ -24,7 +24,7 @@ Three rules to know. `DAILY` reports use the `date` column while `SUMMARY` repor
 
 ## 4. Sponsored Brands Creative Type Is Not a Report Column
 
-No v3 Sponsored Brands report exposes creative type or ad format. Sponsored Brands V4 moved creative type onto the ad entity, so identifying video ads means syncing `sponsored_brands_ads` and joining `creative.type` to report rows on `adId`. The video *metrics* are ordinary report columns, but they are not offered uniformly: `viewClickThroughRate` is `sbCampaigns`-only, and `viewableImpressions` is unavailable on `sbAdGroup`.
+No v3 Sponsored Brands report exposes creative type or ad format. Sponsored Brands V4 moved creative type onto the ad entity, so identifying video ads means syncing `sponsored_brands_ads` and joining `creative.type` to report rows on `adId`. The video *metrics* are ordinary report columns, but the connector does not request them uniformly: `viewClickThroughRate` is requested on `sbCampaigns` only, and `viewableImpressions` is omitted on `sbAdGroup`. Amazon's report-type pages and its column reference disagree on those cells; the connector follows the report-type pages, because one unaccepted column fails the entire report request and returns no rows.
 
 ## Incremental Stream Considerations
 

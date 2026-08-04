@@ -345,6 +345,37 @@ class TestSponsoredBrandsStreamsFullRefresh(TestCase):
         assert any([breaking_error.build().get("message") in error for error in error_logs])
 
     @HttpMocker()
+    def test_given_throttled_when_read_ads_then_retry_and_return_records(self, http_mocker: HttpMocker):
+        """
+        Check ads stream: a 429 carries the same `code`/`details` body shape as a non-breaking error,
+        so without an explicit retry filter it would be IGNOREd — pagination would stop and the sync
+        would finish green having delivered only part of the account's ads. Assert it retries instead.
+        """
+        self._given_oauth_and_profiles(http_mocker, self._config)
+
+        stream_name = "sponsored_brands_ads"
+        data_field = "ads"
+        record_id_path = "adId"
+
+        http_mocker.post(
+            SponsoredBrandsRequestBuilder.ads_endpoint(self._config["client_id"], self._config["access_token"], self._config["profiles"][0])
+            .with_request_body(_DEFAULT_REQUEST_BODY)
+            .build(),
+            [
+                ErrorResponseBuilder.non_breaking_error_response()
+                .with_record(ErrorRecordBuilder.non_breaking_error())
+                .with_status_code(429)
+                .build(),
+                _a_response(stream_name, data_field, None).with_record(_a_record(stream_name, data_field, record_id_path)).build(),
+            ],
+        )
+
+        with patch("time.sleep", return_value=None):
+            output = read_stream(stream_name, SyncMode.full_refresh, self._config)
+
+        assert len(output.records) == 1
+
+    @HttpMocker()
     def test_given_many_pages_when_read_ads_then_return_records(self, http_mocker: HttpMocker):
         """
         Check ads stream: normal full refresh sync with pagination

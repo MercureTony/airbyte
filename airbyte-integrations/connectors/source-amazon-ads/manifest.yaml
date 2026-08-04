@@ -29,10 +29,22 @@ definitions:
 
   basic_error_handler:
     type: DefaultErrorHandler
+    backoff_strategies:
+      # Amazon returns 429 with a Retry-After header (seconds) and asks clients to
+      # retry throttling and server errors: reference/concepts/rate-limiting.
+      - type: WaitTimeFromHeader
+        header: "Retry-After"
+        max_waiting_time_in_seconds: 600
     response_filters:
       - predicate: "{{ 'message' in response }}"
         action: FAIL
         error_message: "{{ response.message }}"
+      # Must precede the code/details IGNORE filter below: every documented Sponsored
+      # Brands v4 error body carries `code` and `details`, so without this a 429/5xx would
+      # be swallowed and pagination would halt mid-stream on an otherwise successful sync.
+      - http_codes: [429, 500, 502, 503, 504]
+        action: RETRY
+        error_message: "Amazon Ads returned a retryable error; retrying with backoff."
       - predicate: "{{ 'code' in response and 'details' in response }}"
         action: IGNORE
         error_message: "{{ response.code }}; {{ response.details }}"

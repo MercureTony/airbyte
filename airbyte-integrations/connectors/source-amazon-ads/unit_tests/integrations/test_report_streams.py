@@ -589,6 +589,11 @@ def test_daily_stream_schema_has_date_in_properties(stream_name: str) -> None:
     )
 
 
+# Bump deliberately when adding or removing a report stream. A silent drop here would empty the
+# guard tests below, and pytest reports an empty parameter set as SKIPPED rather than FAILED.
+_EXPECTED_REPORT_STREAM_COUNT = 32
+
+
 def _report_stream_configurations() -> list:
     manifest = yaml.safe_load(_MANIFEST_PATH.read_text())
     configurations = []
@@ -596,15 +601,35 @@ def _report_stream_configurations() -> list:
         configuration = stream.get("retriever", {}).get("creation_requester", {}).get("request_body_json", {}).get("configuration")
         if configuration and "reportTypeId" in configuration:
             configurations.append((name, configuration, manifest["schemas"][stream["schema_loader"]["schema"]["$ref"].split("/")[-1]]))
+    assert len(configurations) == _EXPECTED_REPORT_STREAM_COUNT, (
+        f"expected {_EXPECTED_REPORT_STREAM_COUNT} report stream configurations, found {len(configurations)}: "
+        "a manifest restructuring may have moved `creation_requester`/`request_body_json` and silently "
+        "narrowed the report-column guard tests"
+    )
     return configurations
 
 
+# `transformation_report_add_fields` (manifest.yaml) injects these into every report record, so they
+# are the only schema properties that legitimately have no matching requested column.
+_INJECTED_REPORT_FIELDS = {"profileId", "reportDate"}
+
+
 @pytest.mark.parametrize("stream_name, configuration, schema", _report_stream_configurations())
-def test_every_requested_report_column_is_declared_in_the_schema(stream_name: str, configuration: dict, schema: dict) -> None:
-    """A column requested from Amazon but absent from the schema is invisible to users during
-    discovery and is dropped by destinations that enforce the catalog."""
-    undeclared = sorted(set(configuration["columns"]) - set(schema["properties"]))
+def test_requested_report_columns_and_schema_properties_match_exactly(stream_name: str, configuration: dict, schema: dict) -> None:
+    """The requested column list and the schema must stay in lockstep in both directions.
+
+    A column requested from Amazon but absent from the schema is invisible during discovery and is
+    dropped by destinations that enforce the catalog. A property with no requested column means the
+    column was dropped from the request and the stream silently stopped emitting that metric. Tying
+    the two together means a column can only be removed by also removing its property, which makes
+    the loss show up as a schema diff in review.
+    """
+    columns = set(configuration["columns"])
+    properties = set(schema["properties"]) - _INJECTED_REPORT_FIELDS
+    undeclared = sorted(columns - properties)
+    unrequested = sorted(properties - columns)
     assert not undeclared, f"{stream_name}: requested but not declared in schema: {undeclared}"
+    assert not unrequested, f"{stream_name}: declared in schema but never requested: {unrequested}"
 
 
 @pytest.mark.parametrize("stream_name, configuration, schema", _report_stream_configurations())
@@ -619,3 +644,31 @@ def test_report_date_columns_match_time_unit(stream_name: str, configuration: di
         assert not {"startDate", "endDate"} & columns, f"{stream_name}: DAILY report requests SUMMARY-only date columns"
     else:
         assert "date" not in columns, f"{stream_name}: SUMMARY report requests the DAILY-only `date` column"
+
+
+# Columns Amazon documents for the report type but rejects for this specific `groupBy`, keyed by
+# (reportTypeId, sorted groupBy). Rejection fails the whole `POST /reporting/reports` call with
+# 400/422, so the stream returns nothing. Mirrors the table in AGENTS.md section 3; only extend it
+# after a live run against a real account proves the column is accepted (or rejected).
+_AMAZON_REJECTED_COLUMNS = {
+    ("spCampaigns", ("adGroup", "campaign")): {"topOfSearchImpressionShare"},
+    ("spPurchasedProduct", ("asin",)): {
+        "addToListFromClicks",
+        "marketplace",
+        "qualifiedBorrowsFromClicks",
+        "royaltyQualifiedBorrowsFromClicks",
+    },
+}
+
+
+@pytest.mark.parametrize("stream_name, configuration, schema", _report_stream_configurations())
+def test_no_report_stream_requests_a_column_amazon_rejects(stream_name: str, configuration: dict, schema: dict) -> None:
+    """Amazon enforces per-`groupBy` exclusions that appear nowhere in its column reference and
+    rejects the entire report-creation request, so a re-added column silently empties the stream.
+    The schema assertion also catches the orphaned-property case, where the column is dropped but
+    its declaration is left behind."""
+    rejected = _AMAZON_REJECTED_COLUMNS.get((configuration["reportTypeId"], tuple(sorted(configuration["groupBy"]))), set())
+    requested = sorted(rejected & set(configuration["columns"]))
+    assert not requested, f"{stream_name}: Amazon rejects these columns for this groupBy: {requested}"
+    declared = sorted(rejected & set(schema["properties"]))
+    assert not declared, f"{stream_name}: schema declares columns Amazon rejects for this groupBy: {declared}"
